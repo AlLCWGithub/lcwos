@@ -21,15 +21,9 @@ b exception_entry
 b exception_entry
 
 exception_entry:
-ldr x0, =_exception_stack_top
-mov sp, x0
-ldr x0, =msg
-bl uart_puts
+ldr sp =_exception_stack_top
+mov x1, 
 
-mrs x1, elr_el1
-add x1, x1, #4
-msr elr_el1, x1
-eret
 .section .rodata
 msg:
 .asciz "Exception occured!\n"

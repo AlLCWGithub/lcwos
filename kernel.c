@@ -29,11 +29,9 @@ return;
 }
 uart_puts("Memory test passed!\n");
 }
-else if(strcmp(cmd, "excepttest") == 0){
-volatile int a = 1;
-volatile int b = 0;
-volatile int c = a / b;
-(void)c;
+else if(strcmp(cmd, "exceptiontest") == 0){
+volatile int *ptr = (volatile int *)0xFFFFFFFF; // outside mapped RAM
+*ptr = 123;
 }
 else{
 uart_puts("Unknown command!\n");
