@@ -21,7 +21,7 @@ b exception_entry
 b exception_entry
 
 exception_entry:
-ldr x0, =_stack_top
+ldr x0, =_exception_stack
 mov sp, x0
 ldr x0, =msg
 bl uart_puts
@@ -33,3 +33,6 @@ eret
 .section .rodata
 msg:
 .asciz "Exception occured!\n"
+.section .bss
+_exception_stack:
+.space 0x1000
