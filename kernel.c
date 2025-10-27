@@ -70,7 +70,12 @@ uart_puts("Stack save and load test failed!\n");
 void stackframetest(int depth, volatile uint64_t pattern){
 volatile uint64_t frame[2];
 frame[0] = pattern;
-frame[1] = -pattern;
+frame[1] = (uint64_t)-pattern;
+uart_puts("Frame values:\n");
+uart_puthex(frame[0]);
+uart_putc('\n');
+uart_puthex(frame[1]);
+uart_putc('\n');
 if(depth > 0){
 stackframetest(depth - 1, pattern + 1);
 }
@@ -118,6 +123,9 @@ void kernel_main(void){
 char input[64];
 uart_puts("Welcome to LCWos!\n");
 uart_puts("Input something!\n");
+volatile uint64_t stack[1];
+stack[0] = 0x11111111UL;
+uart_puthex(stack[0]);
 for(;;){
 uart_puts("> ");
 uart_gets(input, sizeof(input));

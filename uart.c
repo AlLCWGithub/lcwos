@@ -53,7 +53,7 @@ char buffer[17];
 for(int i = 0; i < 16; ++i){
 int shift = (15 - i) * 4;
 int nib = (x >> shift) & 0xF;
-buffer[i] = (nib < 10) ? ('0' + nib) : ('a' + (nib + 10));
+buffer[i] = (nib < 10) ? ('0' + nib) : ('a' + (nib - 10));
 }
 buffer[16] = '\0';
 uart_puts("0x");
