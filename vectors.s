@@ -39,36 +39,42 @@ b _default_handler
 b _default_handler
 
 _sync_el0:
-stp x19, x20, [sp, #-16]!
+stp x29, x30, [sp, #-16]!
+stp x0, x1, [sp, #-16]!
 ldr x0, =sync_el1_spx_msg
+bl uart_puts
+ldp x29, x30, [sp], #16
+ldp x0, x1, [sp], #16
 bl uart_puts
 mrs x1, elr_el1
 add x1, x1, #4
 msr elr_el1, x1
-isb
-ldp x19, x20, [sp], #16
 eret
 
 _sync_el1_spx:
-stp x19, x20, [sp, #-16]!
+stp x29, x30, [sp, #-16]!
+stp x0, x1, [sp, #-16]!
 ldr x0, =sync_el1_spx_msg
+bl uart_puts
+ldp x29, x30, [sp], #16
+ldp x0, x1, [sp], #16
 bl uart_puts
 mrs x1, elr_el1
 add x1, x1, #4
 msr elr_el1, x1
-isb
-ldp x19, x20, [sp], #16
 eret
 
 _sync_lower_aarch64:
-stp x19, x20, [sp, #-16]!
+stp x29, x30, [sp, #-16]!
+stp x0, x1, [sp, #-16]!
 ldr x0, =sync_el1_spx_msg
+bl uart_puts
+ldp x29, x30, [sp], #16
+ldp x0, x1, [sp], #16
 bl uart_puts
 mrs x1, elr_el1
 add x1, x1, #4
 msr elr_el1, x1
-isb
-ldp x19, x20, [sp], #16
 eret
 
 _default_handler:
