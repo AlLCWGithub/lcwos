@@ -126,6 +126,7 @@ uart_puts("Input something!\n");
 volatile uint64_t stack[1];
 stack[0] = 0x11111111UL;
 uart_puthex(stack[0]);
+uart_putc('\n');
 for(;;){
 uart_puts("> ");
 uart_gets(input, sizeof(input));
