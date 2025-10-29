@@ -4,7 +4,7 @@ AS = $(CROSS)as
 LD = $(CROSS)ld
 CFLAGS = -nostdlib -nostartfiles -ffreestanding -O2 -Wall -Wextra -mcpu=cortex-a53
 LDFLAGS = -T linker.ld
-OBJS = start.o kernel.o uart.o
+OBJS = start.o kernel.o uart.o vectors.o
 
 all: kernel.elf
 
@@ -16,6 +16,9 @@ kernel.o: kernel.c
 
 uart.o: uart.c uart.h
 	$(CC) $(CFLAGS) -c uart.c -o uart.o
+
+vectors.o: vectors.s
+	$(AS) vectors.s -o vectors.o
 
 kernel.elf: $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o kernel.elf

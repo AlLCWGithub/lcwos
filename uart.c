@@ -48,7 +48,7 @@ uart_putc(c);
 buffer[i] = '\0';
 }
 
-void uart_puthex(uint64_t x){
+void uart_puthex(volatile uint64_t x){
 char buffer[17];
 for(int i = 0; i < 16; ++i){
 int shift = (15 - i) * 4;

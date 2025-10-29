@@ -9,7 +9,10 @@ return *(unsigned char *)a - *(unsigned char *)b;
 }
 
 void memorytest(void){
-volatile uint32_t *start = (uint32_t *)0x40100000;         volatile uint32_t *end = (uint32_t *)0x40200000;           for(volatile uint32_t *p = start; p < end; ++p){           *p = (uint32_t)(p - start);
+volatile uint32_t *start = (uint32_t *)0x40400000;
+volatile uint32_t *end = (uint32_t *)0x40500000;
+for(volatile uint32_t *p = start; p < end; ++p){
+*p = (uint32_t)(p - start);
 }
 for(volatile uint32_t *p = start; p < end; ++p){
 if(*p != (uint32_t)(p - start)){
@@ -57,8 +60,11 @@ a = teststack[0];
 b = teststack[1];
 c = teststack[2];
 uart_puthex(a);
+uart_putc('\n');
 uart_puthex(b);
+uart_putc('\n');
 uart_puthex(c);
+uart_putc('\n');
 if(a == 0x11111111UL && b == 0x22222222UL && c == 0x33333333UL){
 uart_puts("Stack save and load test passed!\n");
 }
@@ -67,11 +73,11 @@ uart_puts("Stack save and load test failed!\n");
 }
 }
 
-void stackframetest(int depth, volatile uint64_t pattern){
+int stackframetest(int depth, volatile uint64_t pattern){
 volatile uint64_t frame[2];
 frame[0] = pattern;
 frame[1] = (uint64_t)-pattern;
-uart_puts("Frame values:\n");
+uart_puts("Frame values (before):\n");
 uart_puthex(frame[0]);
 uart_putc('\n');
 uart_puthex(frame[1]);
@@ -79,22 +85,35 @@ uart_putc('\n');
 if(depth > 0){
 stackframetest(depth - 1, pattern + 1);
 }
-uart_puts("Frame values: \n");
+uart_puts("Frame values (after):\n");
 uart_puthex(frame[0]);
 uart_putc('\n');
 uart_puthex(frame[1]);
+uart_putc('\n');
 if(frame[0] != pattern || frame[1] != (uint64_t)-pattern){
 uart_puts("Stack frame corruption detected!\n");
+return 1;
 }
+return 0;
 }
 
 void stacktest(int depth, volatile uint64_t pattern){
 stacksaveloadtest();
-stackframetest(depth, pattern);
+if(stackframetest(depth, pattern) == 0){
+uart_puts("Stack frame test passed!\n");
+}
+else{
+uart_puts("Stack frame test failed!\n");
+}
 }
 
-void exceptiontest(void){
+void svcexceptiontest(void){
 __asm__ volatile("svc #0");
+}
+
+void memoryfaultexceptiontest(void){
+volatile uint64_t *badaddr = (volatile uint64_t *)0xFFFFFFFFFFFFFFFF;
+*badaddr = 0x11111111;
 }
 
 void handle_command(const char *cmd){
@@ -109,10 +128,11 @@ else if(strcmp(cmd, "memorytest") == 0){
 memorytest();
 }
 else if(strcmp(cmd, "stacktest") == 0){
-stacktest(2, 0x11111111UL);
+stacktest(20, 0x11111111UL);
 }
 else if(strcmp(cmd, "exceptiontest") == 0){
-exceptiontest();
+svcexceptiontest();
+memoryfaultexceptiontest();
 }
 else{
 uart_puts("Unknown command!\n");
@@ -123,10 +143,6 @@ void kernel_main(void){
 char input[64];
 uart_puts("Welcome to LCWos!\n");
 uart_puts("Input something!\n");
-volatile uint64_t stack[1];
-stack[0] = 0x11111111UL;
-uart_puthex(stack[0]);
-uart_putc('\n');
 for(;;){
 uart_puts("> ");
 uart_gets(input, sizeof(input));
