@@ -59,3 +59,18 @@ buffer[16] = '\0';
 uart_puts("0x");
 uart_puts(buffer);
 }
+
+void uart_putint(uint64_t number){
+char buffer[21];
+int i = 20;
+buffer[i] = '\0';
+if(number == 0){
+uart_putc('0');
+return;
+}
+while(number > 0 && i > 0){
+buffer[--i] = '0' + (number % 10);
+number /= 10;
+}
+uart_puts(&buffer[i]);
+}

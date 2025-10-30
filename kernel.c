@@ -1,5 +1,7 @@
 #include "uart.h"
 
+register uint64_t start_time asm("x19");
+
 int strcmp(const char *a, const char *b){
 while(*a && *b && (*a == *b)){
 ++a;
@@ -116,9 +118,47 @@ volatile uint64_t *badaddr = (volatile uint64_t *)0xFFFFFFFFFFFFFFFF;
 *badaddr = 0x11111111;
 }
 
+void irqexceptiontest(void){
+uint64_t freq, now, next;
+__asm__ volatile("mrs %0, cntfrq_el0" : "=r"(freq));
+__asm__ volatile("mrs %0, cntvct_el0" : "=r"(now));
+next = now + freq / 4;
+__asm__ volatile("msr cntv_cval_el0, %0" :: "r"(next));
+__asm__ volatile("msr cntv_ctl_el0, %0" :: "r"(1));
+__asm__ volatile("wfi");
+__asm__ volatile("mrs %0, cntvct_el0" : "=r"(now));
+if(now >= next){
+uart_puts("Pass!\n");
+}
+else{
+uart_puts("Likely failed!\n");
+}
+}
+
+void getuptime(void){
+uint64_t now, freq;
+__asm__ volatile("mrs %0, cntvct_el0" : "=r"(now));
+__asm__ volatile("mrs %0, cntfrq_el0" : "=r"(freq));
+if(freq == 0){
+uart_puts("uptime: timer frequency 0 (bad)\n");
+return;
+}
+uint64_t elapsed = now - start_time;
+uint64_t seconds = elapsed / freq;
+uint64_t milliseconds = ((elapsed % freq) * 1000) / freq;
+uart_puts("Uptime: ");
+uart_putint(seconds);
+uart_puts(" s, ");
+uart_putint(milliseconds);
+uart_puts(" ms\n");
+}
+
 void handle_command(const char *cmd){
 if(strcmp(cmd, "hello") == 0){
 uart_puts("Hello!\n");
+}
+else if(strcmp(cmd, "uptime") == 0){
+getuptime();
 }
 else if(strcmp(cmd, "reboot") == 0){
 extern void _start(void);
@@ -133,6 +173,7 @@ stacktest(20, 0x11111111UL);
 else if(strcmp(cmd, "exceptiontest") == 0){
 svcexceptiontest();
 memoryfaultexceptiontest();
+irqexceptiontest();
 }
 else{
 uart_puts("Unknown command!\n");

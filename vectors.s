@@ -102,6 +102,22 @@ eret
 _irq_el1:
 stp x29, x30, [sp, #-16]!
 stp x0, x1, [sp, #-16]!
+ldr x0, =msg_irq
+bl uart_puts
+mrs x0, FAR_EL1
+bl uart_puthex
+ldr x0, =msg_n
+bl uart_puts
+mrs x0, cntv_ctl_el0
+orr x0, x0, #2
+msr cntv_ctl_el0, x0
+mrs x0, cntv_cval_el0
+mrs x1, cntfrq_el0
+add x0, x0, x1
+msr cntv_cval_el0, x0
+ldp x0, x1, [sp], #16
+ldp x29, x30, [sp], #16
+eret
 
 
 _default_handler:
@@ -122,10 +138,14 @@ msg_svc:
 msg_data_abort:
 .asciz "Sync exception occured! (Data abort)\n"
 
+msg_irq:
+.asciz "IRQ exception occured!\n"
+
 msg_unknown:
 .asciz "Sync exception occured! (unknown)\n"
 
 msg_default:
 .asciz "I am not done with other handlers, you should not be here lol!\n"
+
 msg_n:
 .asciz "\n"

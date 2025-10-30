@@ -1,7 +1,7 @@
 #!/bin/bash
 if [[ "$1" == "--debug" ]]; then
 echo "Debug file with name 'qemu.log'"
-qemu-system-aarch64 -machine virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel kernel.elf | tee qemu.log
+qemu-system-aarch64 -m 128M -machine virt -cpu cortex-a53 -nographic -device vhost-user-i2c-device -device ds1338,bus=i2c0 -serial mon:stdio -kernel kernel.elf | tee qemu.log
 else
-qemu-system-aarch64 -machine virt -cpu cortex-a53 -nographic -serial mon:stdio -kernel kernel.elf | tee qemu.log
+qemu-system-aarch64 -m 128M -machine virt -cpu cortex-a53 -nographic -device vhost-user-i2c-device -device ds1338,bus=i2c0 -serial mon:stdio -kernel kernel.elf
 fi
