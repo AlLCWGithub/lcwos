@@ -1,4 +1,5 @@
 #include "uart.h"
+#include "rtc.h"
 
 register uint64_t start_time asm("x19");
 
@@ -146,7 +147,18 @@ return;
 uint64_t elapsed = now - start_time;
 uint64_t seconds = elapsed / freq;
 uint64_t milliseconds = ((elapsed % freq) * 1000) / freq;
-uart_puts("Uptime: ");
+uint32_t rtc_seconds = rtc_read_seconds();
+uint32_t sgt_time = rtc_seconds + (8 * 3600);
+uint32_t sgt_hour = (sgt_time / 3600) % 24;
+uint32_t sgt_minute = (sgt_time / 60) % 60;
+uint32_t sgt_second = sgt_time % 60;
+uart_putc(' ');
+uart_putint(sgt_hour);
+uart_putc(':');
+uart_putint(sgt_minute);
+uart_putc(':');
+uart_putint(sgt_second);
+uart_puts(" up ");
 uart_putint(seconds);
 uart_puts(" s, ");
 uart_putint(milliseconds);
@@ -184,6 +196,7 @@ void kernel_main(void){
 char input[64];
 uart_puts("Welcome to LCWos!\n");
 uart_puts("Input something!\n");
+rtc_init();
 for(;;){
 uart_puts("> ");
 uart_gets(input, sizeof(input));
